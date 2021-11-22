@@ -6,14 +6,11 @@ import axiosInstance from '../src/common/axios';
 const Login = (props) => {
     const onFinish = async (values) => {
         // console.log('Success:', values);
-        fetch("https://user-taskapi.herokuapp.com/user/login", {
+        fetch("https://express-api-task.herokuapp.com/user/login", {
             method: "POST",
             credentials: 'include',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                email: "example@gmail.com",
-                password: "example",
-            }),
+            body: JSON.stringify(values),
         })
             .then((res) => res.json())
             .then((data) => console.log(data));

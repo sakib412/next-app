@@ -11,11 +11,7 @@ export default function Home() {
       console.log(er.response)
     });
 
-
-
   }, [])
-
-
 
 
   return (
