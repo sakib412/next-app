@@ -1,10 +1,15 @@
 import { Form, Input, Button, Typography } from 'antd';
-import React from 'react';
+import { useRouter } from 'next/router';
+import React, { useContext } from 'react';
+import authContext from '../contexts/authContext';
 import axiosInstance from '../src/common/axios';
 import { setCookie } from '../src/common/cookie';
+import Notification from '../src/common/notification';
+
 
 const Login = (props) => {
-
+    const router = useRouter()
+    const { setAuthenticated } = useContext(authContext);
     const onFinish = async (values) => {
         // axiosInstance.post("/user/login", values).then(response => {
         //     console.log(response.data)
@@ -21,7 +26,21 @@ const Login = (props) => {
             body: JSON.stringify(values),
         })
             .then((res) => res.json())
-            .then((data) => console.log(data));
+            .then((data) => {
+                if (data.status) {
+                    setAuthenticated(true);
+                    router.push("/")
+                    Notification({ message: data.message, status: data.status ? 200 : 401 })
+
+                } else {
+                    setAuthenticated(false);
+                    Notification({ message: data.message, status: data.status ? 200 : 401 })
+                }
+
+            }).catch(err => {
+                console.log(err)
+
+            });
     };
 
     const onFinishFailed = (errorInfo) => {

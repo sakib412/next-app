@@ -1,15 +1,46 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { Layout as AntdLayout, Menu, Row, Col } from 'antd';
+import axiosInstance from '../src/common/axios';
+import authContext from '../contexts/authContext';
 const { Header, Content, Footer } = AntdLayout;
 
-export const AuthContext = React.createContext(false);
-
 export default function Layout(props) {
+    const router = useRouter();
+    const [authenticated, setAuthenticated] = useState(false);
+    useEffect(() => {
+        axiosInstance.get("/user/check").then(response => {
+            if (response.data.status) {
+                setAuthenticated(true);
+                router.push("/")
+            }
+            else {
+                setAuthenticated(false)
+                router.push("/login")
+            }
+        }).catch(err => {
+            setAuthenticated(false)
+            console.log(err.response)
+            router.push("/login")
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authenticated, setAuthenticated])
+
+    const logoutHandle = () => {
+        axiosInstance.get("/user/logout").then(res => {
+            setAuthenticated(false)
+
+
+        }).catch(err => {
+            console.log(err.response);
+        })
+    }
+
 
 
     return (
-        <AuthContext.Provider value={false}>
+        <authContext.Provider value={{ authenticated, setAuthenticated }}>
             <AntdLayout className="layout">
                 <Header>
                     <Row justify="space-between">
@@ -18,10 +49,14 @@ export default function Layout(props) {
                         </Col>
                         <Col span={8}>
                             <Menu theme="dark" mode="horizontal">
+                                {authenticated ? <Menu.Item key={34}><span onClick={logoutHandle}>Logout</span></Menu.Item> :
+                                    (<>
+                                        <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item>
+                                        <Menu.Item key={2}><Link href="/login"><a>Login</a></Link></Menu.Item>
+                                        <Menu.Item key={3}><Link href="/signup"><a>Sign Up</a></Link></Menu.Item>
+                                    </>
+                                    )}
 
-                                <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item>
-                                <Menu.Item key={2}><Link href="/login"><a>Login</a></Link></Menu.Item>
-                                <Menu.Item key={3}><Link href="/signup"><a>Sign Up</a></Link></Menu.Item>
                             </Menu>
                         </Col>
                     </Row>
@@ -31,6 +66,6 @@ export default function Layout(props) {
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>Task APP</Footer>
             </AntdLayout>
-        </AuthContext.Provider>
+        </authContext.Provider>
     )
 }

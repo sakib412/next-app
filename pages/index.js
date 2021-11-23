@@ -1,52 +1,60 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useContext } from "react"
+import { useRouter } from "next/router";
 import { Row, Col, Input, Button, Typography, List, Form, Spin } from 'antd'
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import axiosInstance from "../src/common/axios"
-
-
+import authContext from "../contexts/authContext";
+import Notification from "../src/common/notification";
 
 export default function Home() {
+  const router = useRouter()
+  const { authenticated } = useContext(authContext);
   const [tasks, setTask] = useState([]);
   const [loading, setLoading] = useState(true);
   const [taskForm] = Form.useForm();
   function getTasks() {
     setLoading(true)
     axiosInstance.get("/task/get?status=true").then(response => {
-      console.log(response.data.data)
-      setTask(response.data.data);
+      setTask(response.data.data.reverse());
       setLoading(false);
     }).catch(er => {
+      setLoading(false);
       console.log(er.response)
     });
   }
+
   useEffect(() => {
     getTasks()
-
+    if (!authenticated) {
+      router.push("/login")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setTask]);
 
   const addTask = (values) => {
     setLoading(true)
-    console.log(values);
     axiosInstance.post("/task/add", values).then(res => {
       taskForm.resetFields();
+      Notification({ message: res.data.message, status: res.data.status ? 200 : 401 })
       getTasks();
     }).catch(err => {
       console.log(err)
+      Notification({ message: err.response.data.message, status: err.response.data.status ? 200 : 401 })
     })
   }
   const updateTask = (event, status) => {
     setLoading(true)
-    console.log(event.target.value, status)
     const taskBody = {
       taskId: event.target.value,
       status: status == 'done' ? "todo" : "done"
     }
     axiosInstance.post("/task/update", taskBody).then(res => {
       setLoading(false)
-      console.log(res.data)
+      Notification({ message: res.data.message, status: res.data.status ? 200 : 401 })
       getTasks()
     }).catch(err => {
-
+      Notification({ message: err.response.data.message, status: err.response.data.status ? 200 : 401 })
+      setLoading(false)
       console.log(err)
     })
   }

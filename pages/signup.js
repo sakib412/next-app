@@ -8,6 +8,8 @@ import {
 } from 'antd';
 
 import axiosInstance from '../src/common/axios';
+import { useRouter } from 'next/router';
+import Notification from '../src/common/notification';
 
 const formItemLayout = {
     labelCol: {
@@ -41,30 +43,24 @@ const tailFormItemLayout = {
 };
 
 const SignUp = () => {
+    const router = useRouter()
     const [form] = Form.useForm();
 
     const onFinish = ({ firstName, lastName, email, password }) => {
         const signupBody = {
-
-            "firstName": firstName,
-            "lastName": lastName,
-            "email": email,
-            "password": password
-
+            firstName,
+            lastName,
+            email,
+            password
         }
-        fetch("https://user-taskapi.herokuapp.com/user/register", {
-            method: "POST",
-            credentials: "include",
-            withCredentials: true,
-            body: JSON.stringify(signupBody),
+        axiosInstance.post('/user/register', signupBody).then((response) => {
+            Notification({ message: response.data.message, status: response.data.status ? 200 : 401 })
+            router.push("/login")
+
+        }).catch((error) => {
+            Notification({ message: error.response.data.message, status: error.response.data.status })
+            console.log(error.response)
         })
-            .then((res) => res.json())
-            .then((data) => console.log(data));
-        // axiosInstance.post('/user/register', signupBody).then((response) => {
-        //     console.log(response)
-        // }).catch((error) => {
-        //     console.log(error.response)
-        // })
     };
 
     return (
@@ -85,8 +81,8 @@ const SignUp = () => {
                 scrollToFirstError
             >
                 <Form.Item
-                    name="First Name"
-                    label="firstName"
+                    name="firstName"
+                    label="First Name"
                     rules={[
                         {
                             required: true,
@@ -98,8 +94,8 @@ const SignUp = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    name="Last Name"
-                    label="lastName"
+                    name="lastName"
+                    label="Last Name"
                     tooltip="Last Name"
                     rules={[
                         {
