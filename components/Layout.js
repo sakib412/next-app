@@ -9,17 +9,21 @@ const { Header, Content, Footer } = AntdLayout;
 export default function Layout(props) {
     const router = useRouter();
     const [authenticated, setAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         axiosInstance.get("/user/check").then(response => {
             if (response.data.status) {
                 setAuthenticated(true);
+                setLoading(false)
                 router.push("/")
             }
             else {
+                setLoading(false)
                 setAuthenticated(false)
                 router.push("/login")
             }
         }).catch(err => {
+            setLoading(false)
             setAuthenticated(false)
             console.log(err.response)
             router.push("/login")
@@ -49,13 +53,14 @@ export default function Layout(props) {
                         </Col>
                         <Col span={8}>
                             <Menu theme="dark" mode="horizontal">
-                                {authenticated ? <Menu.Item key={34}><span onClick={logoutHandle}>Logout</span></Menu.Item> :
+                                {loading ? <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item> : authenticated ? <Menu.Item key={34}><span onClick={logoutHandle}>Logout</span></Menu.Item> :
                                     (<>
-                                        <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item>
+
                                         <Menu.Item key={2}><Link href="/login"><a>Login</a></Link></Menu.Item>
                                         <Menu.Item key={3}><Link href="/signup"><a>Sign Up</a></Link></Menu.Item>
                                     </>
                                     )}
+
 
                             </Menu>
                         </Col>

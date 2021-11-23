@@ -39,7 +39,8 @@ export default function Home() {
       getTasks();
     }).catch(err => {
       console.log(err)
-      Notification({ message: err.response.data.message, status: err.response.data.status ? 200 : 401 })
+      setLoading(false)
+      Notification({ message: "try again", status: 401 })
     })
   }
   const updateTask = (event, status) => {
@@ -53,13 +54,13 @@ export default function Home() {
       Notification({ message: res.data.message, status: res.data.status ? 200 : 401 })
       getTasks()
     }).catch(err => {
-      Notification({ message: err.response.data.message, status: err.response.data.status ? 200 : 401 })
+      Notification({ message: "Try again", status: 401 })
       setLoading(false)
       console.log(err)
     })
   }
 
-  return (
+  return (<>{authenticated ? (
     <div style={{ minHeight: "20rem" }}>
       <Typography.Title style={{ textAlign: 'center' }}>Add Task</Typography.Title>
       <Row justify="center" align="middle">
@@ -94,15 +95,15 @@ export default function Home() {
                       <input defaultValue={task._id} id={task._id} onClick={(e) => updateTask(e, task.status)} hidden />
 
                       {/* <Form form={taskItem} onFinish={updateTask} initialValues={{
-                        [task._id]: task.title,
-                      }}>
-                        <Form.Item name={task._id}>
-                          <Input />
-                        </Form.Item>
-                        <Button htmlType="submit">
-                          <CheckCircleOutlined />
-                        </Button>
-                      </Form> */}
+                    [task._id]: task.title,
+                  }}>
+                    <Form.Item name={task._id}>
+                      <Input />
+                    </Form.Item>
+                    <Button htmlType="submit">
+                      <CheckCircleOutlined />
+                    </Button>
+                  </Form> */}
                     </Col>
                   </Row>
                 </List.Item>
@@ -110,8 +111,8 @@ export default function Home() {
             />
           </Spin>
         </Col>
-
       </Row>
-    </div>
+    </div>) : <Spin spinning={true}>Loading</Spin>}
+  </>
   )
 }
