@@ -1,27 +1,27 @@
 import { Form, Input, Button, Typography } from 'antd';
 import React from 'react';
-
 import axiosInstance from '../src/common/axios';
+import { setCookie } from '../src/common/cookie';
 
 const Login = (props) => {
+
     const onFinish = async (values) => {
-        // console.log('Success:', values);
-        fetch("https://express-api-task.herokuapp.com/user/login", {
+        // axiosInstance.post("/user/login", values).then(response => {
+        //     console.log(response.data)
+        //     setCookie("jwt", response.data.data.token, 1);
+
+        // }).catch(error => {
+        //     console.log(error)
+        // })
+        fetch("https://user-taskapi.herokuapp.com/user/login", {
             method: "POST",
             credentials: 'include',
+            withCredentials: true,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(values),
         })
             .then((res) => res.json())
             .then((data) => console.log(data));
-        // const json = await response.json();
-        // console.log(json);
-        // axiosInstance.post("/user/login", values, { withCredentials: true }).then(response => {
-        //     console.log(response.data)
-
-        // }).catch(error => {
-        //     console.log(error)
-        // })
     };
 
     const onFinishFailed = (errorInfo) => {

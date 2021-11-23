@@ -52,11 +52,19 @@ const SignUp = () => {
             "password": password
 
         }
-        axiosInstance.post('/user/register', signupBody, { withCredentials: true }).then((response) => {
-            console.log(response)
-        }).catch((error) => {
-            console.log(error.response)
+        fetch("https://user-taskapi.herokuapp.com/user/register", {
+            method: "POST",
+            credentials: "include",
+            withCredentials: true,
+            body: JSON.stringify(signupBody),
         })
+            .then((res) => res.json())
+            .then((data) => console.log(data));
+        // axiosInstance.post('/user/register', signupBody).then((response) => {
+        //     console.log(response)
+        // }).catch((error) => {
+        //     console.log(error.response)
+        // })
     };
 
     return (
