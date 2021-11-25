@@ -174,3 +174,31 @@ const SignUp = () => {
 
 
 export default SignUp;
+
+export async function getServerSideProps({ req, res }) {
+    let data;
+    try {
+        const resp = await axiosInstance.get("/user/check",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cookie": req.headers.cookie
+                }
+            });
+        data = await resp.data;
+        console.log(data);
+        return {
+            redirect: {
+                permanent: false,
+                destination: '/',
+            }
+        }
+    } catch (e) {
+        console.log("server eroorrrs", e)
+
+    }
+    return {
+
+        props: {}
+    }
+}

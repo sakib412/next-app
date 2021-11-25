@@ -6,15 +6,19 @@ import axiosInstance from "../src/common/axios"
 import authContext from "../contexts/authContext";
 import Notification from "../src/common/notification";
 
-export default function Home() {
+export default function Home({ data, token }) {
   const router = useRouter()
-  const { authenticated } = useContext(authContext);
   const [tasks, setTask] = useState([]);
   const [loading, setLoading] = useState(true);
   const [taskForm] = Form.useForm();
   function getTasks() {
     setLoading(true)
-    axiosInstance.get("/task/get?status=true").then(response => {
+    axiosInstance.get("/task/get?status=true", {
+      headers: {
+        "Content-Type": "application/json",
+        // "Cookie": token
+      }
+    }).then(response => {
       setTask(response.data.data.reverse());
       setLoading(false);
     }).catch(er => {
@@ -25,15 +29,17 @@ export default function Home() {
 
   useEffect(() => {
     getTasks()
-    if (!authenticated) {
-      router.push("/login")
-    }
+    // if (!data?.status) {
+    //   router.push("/login")
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setTask]);
+  }, []);
 
   const addTask = (values) => {
     setLoading(true)
-    axiosInstance.post("/task/add", values).then(res => {
+    axiosInstance.post("/task/add",
+      values
+    ).then(res => {
       taskForm.resetFields();
       Notification({ message: res.data.message, status: res.data.status ? 200 : 401 })
       getTasks();
@@ -60,7 +66,7 @@ export default function Home() {
     })
   }
 
-  return (<>{authenticated ? (
+  return (
     <div style={{ minHeight: "20rem" }}>
       <Typography.Title style={{ textAlign: 'center' }}>Add Task</Typography.Title>
       <Row justify="center" align="middle">
@@ -94,16 +100,7 @@ export default function Home() {
 
                       <input defaultValue={task._id} id={task._id} onClick={(e) => updateTask(e, task.status)} hidden />
 
-                      {/* <Form form={taskItem} onFinish={updateTask} initialValues={{
-                    [task._id]: task.title,
-                  }}>
-                    <Form.Item name={task._id}>
-                      <Input />
-                    </Form.Item>
-                    <Button htmlType="submit">
-                      <CheckCircleOutlined />
-                    </Button>
-                  </Form> */}
+
                     </Col>
                   </Row>
                 </List.Item>
@@ -112,7 +109,34 @@ export default function Home() {
           </Spin>
         </Col>
       </Row>
-    </div>) : <Spin spinning={true}>Loading</Spin>}
-  </>
+    </div>
   )
+}
+
+export async function getServerSideProps({ req, res }) {
+  let data;
+  try {
+    const resp = await axiosInstance.get("/user/check",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cookie": req.headers.cookie
+        }
+      });
+    data = await resp.data;
+    console.log(data);
+  } catch (e) {
+    console.log("server eroorrrs", e)
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+
+      props: {},
+    }
+  }
+  return {
+    props: { data: data || null, token: req.headers.cookie }
+  }
 }

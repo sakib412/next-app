@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Layout as AntdLayout, Menu, Row, Col } from 'antd';
+import cookies from 'js-cookie';
 import axiosInstance from '../src/common/axios';
 import authContext from '../contexts/authContext';
 const { Header, Content, Footer } = AntdLayout;
@@ -34,6 +35,7 @@ export default function Layout(props) {
     const logoutHandle = () => {
         axiosInstance.get("/user/logout").then(res => {
             setAuthenticated(false)
+            cookies.remove('jwt');
 
 
         }).catch(err => {
@@ -52,17 +54,15 @@ export default function Layout(props) {
                             <h2 style={{ color: "whitesmoke" }}><Link href="/"><a>Task</a></Link></h2>
                         </Col>
                         <Col span={8}>
-                            <Menu theme="dark" mode="horizontal">
-                                {loading ? <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item> : authenticated ? <Menu.Item key={34}><span onClick={logoutHandle}>Logout</span></Menu.Item> :
+                            {loading ? null : (<Menu theme="dark" mode="horizontal">
+                                <Menu.Item key={1}><Link href="/"><a>Home</a></Link></Menu.Item>
+                                {authenticated ? <Menu.Item key={34}><span onClick={logoutHandle}>Logout</span></Menu.Item> :
                                     (<>
-
                                         <Menu.Item key={2}><Link href="/login"><a>Login</a></Link></Menu.Item>
                                         <Menu.Item key={3}><Link href="/signup"><a>Sign Up</a></Link></Menu.Item>
-                                    </>
-                                    )}
+                                    </>)}
+                            </Menu>)}
 
-
-                            </Menu>
                         </Col>
                     </Row>
                 </Header>

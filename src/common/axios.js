@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'https://user-taskapi.herokuapp.com/',
+    baseURL: 'https://express-api-task.herokuapp.com/',
     timeout: 3000,
     withCredentials: true,
     credentials: 'include',
